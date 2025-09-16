@@ -45,7 +45,6 @@ $$f = \sum_{k=-j}^{i} b_k \cdot 2^{k}$$
   - Can't exactly represent all numbers
   - Limited range of numbers
 
-
 ---
 
 # IEEE Floating Point
@@ -151,7 +150,6 @@ tiny floating point example (s=0)
 - Rounding Binary Numbers
   - “Even” when least significant bit is 0
   - “Half way” when bits to right of rounding position = $100..._2$
-
 
 ---
 
