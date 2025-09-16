@@ -28,9 +28,9 @@ seoMeta:
   # ogImage: https://cover.sli.dev
 ---
 
-# Welcome to Slidev
+# Float
 
-Presentation slides for developers
+ICS recitation
 
 <div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
   Press Space for next page <carbon:arrow-right />
@@ -53,7 +53,7 @@ The last comment block of each slide will be treated as slide notes. It will be 
 transition: fade-out
 ---
 
-# What is Slidev?
+# Fractional binary numbers
 
 Slidev is a slides maker and presenter designed for developers, consist of the following features
 
@@ -95,7 +95,7 @@ transition: slide-up
 level: 2
 ---
 
-# Navigation
+# IEEE Floating Point
 
 Hover on the bottom-left corner to see the navigation's controls panel, [learn more](https://sli.dev/guide/ui#navigation-bar)
 
@@ -122,7 +122,7 @@ layout: two-cols
 layoutClass: gap-16
 ---
 
-# Table of contents
+# Operation
 
 You can use the `Toc` component to generate a table of contents for your slides:
 
@@ -141,7 +141,7 @@ layout: image-right
 image: https://cover.sli.dev
 ---
 
-# Code
+# Rounding
 
 Use code snippets and get the highlighting directly, and even types hover!
 
@@ -193,7 +193,7 @@ Notes can also sync with clicks
 level: 2
 ---
 
-# Shiki Magic Move
+# Multiplication
 
 Powered by [shiki-magic-move](https://shiki-magic-move.netlify.app/), Slidev supports animations across multiple code snippets.
 
@@ -265,7 +265,7 @@ const author = {
 
 ---
 
-# Components
+# Addition
 
 <div grid="~ cols-2 gap-4">
 <div>
@@ -309,7 +309,7 @@ Also, HTML elements are valid:
 class: px-20
 ---
 
-# Themes
+# Floating Point in C
 
 Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
 
@@ -338,7 +338,7 @@ check out the [Awesome Themes Gallery](https://sli.dev/resources/theme-gallery).
 
 ---
 
-# Clicks Animations
+# Thinking
 
 You can add `v-click` to elements to add a click animation.
 
@@ -374,7 +374,8 @@ also allows you to add
 </div>
 
 ---
-
+hide: true
+---
 # Motions
 
 Motion animations are powered by [@vueuse/motion](https://motion.vueuse.org/), triggered by `v-motion` directive.
@@ -454,7 +455,8 @@ const final = {
 </div>
 
 ---
-
+hide: true
+---
 # LaTeX
 
 LaTeX is supported out-of-box. Powered by [KaTeX](https://katex.org/).
@@ -476,7 +478,8 @@ $$
 [Learn more](https://sli.dev/features/latex)
 
 ---
-
+hide: true
+---
 # Diagrams
 
 You can create diagrams / graphs from textual descriptions, directly in your Markdown.
@@ -557,6 +560,7 @@ Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML D
 foo: bar
 dragPos:
   square: 691,32,167,_,-16
+hide: true
 ---
 
 # Draggable Elements
@@ -598,13 +602,10 @@ Double-click on the draggable elements to edit their positions.
 
 <v-drag-arrow pos="67,452,253,46" two-way op70 />
 
----
-src: ./pages/imported-slides.md
-hide: false
----
 
 ---
-
+hide: true
+---
 # Monaco Editor
 
 Slidev provides built-in Monaco Editor support.
@@ -632,6 +633,7 @@ console.log(emptyArray<number>(10).reduce(fib => [...fib, fib.at(-1)! + fib.at(-
 ---
 layout: center
 class: text-center
+hide: true
 ---
 
 # Learn More
