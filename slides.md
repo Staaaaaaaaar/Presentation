@@ -219,7 +219,7 @@ transition: slide-up
 
 </div>
 
-<div class="flex flex-col gap-3 w-full max-w-70 mx-auto mt-4">
+<div class="flex flex-col gap-3 w-full max-w-70 mx-auto mt-10">
   <div class="text-center border border-green-500/30 bg-green-500/5 p-3 rounded">
     <div class="text-lg font-bold mb-1 text-green-700">Clone</div>
     <div class="text-xs">
@@ -312,7 +312,7 @@ flowchart LR
 ```
 
 <div class="grid grid-cols-2 gap-6 mt-6">
-  <div class="border rounded p-5">
+  <div class="border rounded p-5 bg-gray-500/5">
     <div class="font-bold mb-1">VGG 特征是什么？</div>
     <div class="opacity-80 text-sm" v-markdown>
 
@@ -320,7 +320,7 @@ VGG 特征指的是使用 VGG 神经网络提取的中间层激活值 $F\in\math
 
   </div>
   </div>
-  <div class="border rounded p-5">
+  <div class="border rounded p-5 bg-gray-500/5">
     <div class="font-bold mb-1">Gram 矩阵为什么代表风格？</div>
     <div class="opacity-80 text-sm" v-markdown>
 
@@ -342,10 +342,78 @@ transition: fade-out
 用户通过自然语言描述物体，系统自动定位对应的高斯点，并支持**删除、改色、平移**等编辑操作。
 
 ---
+transition: fade-out
+---
 
 # 场景编辑（Editing）
 
-原理：基于文本的高斯点筛选与编辑
+1. 离线语义预处理（SAM + CLIP）
+
+<div class="mt-6 mb-6">
+```mermaid
+flowchart LR
+  I["多视角图像"] --> SAM["SAM 多尺度分割得到 mask"]
+  SAM --> Crop["按 mask 裁剪区域"]
+  Crop --> CLIP["OpenCLIP 提取视觉特征：512D"]
+```
+</div>
+
+- 基于 SAM 的场景解构：首先，从多个视角捕获的场景图像被输入 SAM。SAM 作为一种强大的通用零样本分割器，能够将每张二维图像无类别预设地分割为一系列边界精准、语义一致的候选区域。这相当于对三维世界在二维投影上进行了初步的、实例化的“解剖”。
+
+- 基于 CLIP 的语义嵌入：随后，每个由 SAM 分割得到的候选区域图像块，被输入 CLIP 模型的图像编码器。CLIP 作为一个在多模态（图像-文本）对比学习中训练的模型，能够将图像内容映射到一个高维的、与文本共享的语义特征空间。至此，每个候选区域被赋予了一个具有丰富语义信息的 512 维特征向量，为后续与任意文本描述的匹配奠定了基础。
+
+
+---
+transition: fade-out
+---
+
+# 场景编辑（Editing）
+
+2. 语义特征绑定到 3DGS 模型
+
+<div class="mt-6 mb-6">
+```mermaid
+flowchart LR
+  F["多视角图像语义特征：512D"] --> AE["AE 压缩：512D to 3D"]
+
+  G0["预训练 3DGS 模型"] --> G1["为每个高斯点添加语义特征：3D"]
+  G1 --> R["带语义特征的渲染图"]
+  AE --> Loss["Loss：MSE + Cos"]
+  R --> Loss
+  Loss --> Gs["语义增强 3DGS"]
+```
+</div>
+
+- 语义特征附着与压缩：与为每个三维高斯点定义位置、颜色、透明度等属性类似，为每个高斯点附加一个额外的语义特征属性。
+- 可微语义渲染：在训练过程中，当 3DGS 根据视点渲染出二维图像时，系统会同时执行可微的语义特征渲染。
+- 优化目标：优化目标是最小化特征图与对应视角的 CLIP GT 语义特征图之间的差异。
+
+
+
+---
+
+# 场景编辑（Editing）
+
+3. 文本定位和编辑
+
+<div class="mt-6 mb-6">
+```mermaid
+flowchart LR
+  T["文本查询"] --> Txt["CLIP 文本编码：512D"]
+  Gs["语义增强 3DGS"] --> Lang3["每个点的语义特征：3D"]
+  Lang3 --> Dec["AE 解码：3D to 512D"]
+  Txt --> Sim["余弦相似度 > 阈值"]
+  Dec --> Sim
+  Sim --> Mask["选中高斯点掩码"]
+  Mask --> Op["隐藏"]
+  Mask --> Col["改色"]
+  Mask --> Mov["平移"]
+```
+</div>
+
+- 查询向量化与相似度检索：将用户输入文本通过 CLIP 转化为特征向量，接着计算余弦相似度选择匹配的目标。
+- 基于高斯属性的显式编辑：得益于 3DGS 的显式表示，对检索出的目标高斯点集合进行隐藏、改色或平移操作。
+
 
 
 
