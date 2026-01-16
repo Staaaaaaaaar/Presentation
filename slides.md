@@ -10,7 +10,7 @@ lineNumbers: false
 # 幻灯片信息
 info: |
   ## 计算机图形学大作业
-  基于高斯泼溅的三维场景重建
+  基于 3DGS 的场景重建和编辑
   Team Project Presentation
 # 绘图功能配置
 drawings:
@@ -18,26 +18,11 @@ drawings:
 # 默认过渡动画
 transition: slide-left
 # 标题
-title: 基于高斯泼溅的三维场景重建
+title: 基于 3DGS 的场景重建和编辑
 ---
 
-# 基于高斯泼溅的三维场景重建
-## 3D Scene Reconstruction based on Gaussian Splatting
-
-计算机图形学大作业展示
-
-<div class="pt-12">
-  <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer hover:bg-white hover:bg-opacity-10">
-    按空格键开始 <carbon:arrow-right class="inline"/>
-  </span>
-</div>
-
-<div class="abs-br m-6 flex gap-2">
-  <a href="https://github.com/your-repo-link" target="_blank" alt="GitHub"
-    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
-    <carbon-logo-github />
-  </a>
-</div>
+# 基于 3DGS 的场景重建和编辑
+## Scene Reconstruction and Editing based on Gaussian Splatting
 
 ---
 layout: section
@@ -191,10 +176,9 @@ transition: fade-out
 1.  **初始化：**
     - SFM 点云：使用 COLMAP 等工具对多张照片进行特征匹配，生成稀疏的三维点云。
     - 初始化参数：每个初始点被转化为一个 3D 高斯椭球，其属性包括
-        - 位置
-        - 协方差
-        - 透明度
-        - 球谐系数
+        - 位置、透明度、球谐系数
+        - 协方差：使用旋转 $q$ 和缩放 $s$ 表示
+            $$ \Sigma = R S S^T R^T $$
 
 <img src="./img/SFM.png" alt="SFM" class="max-w-full h-auto mt-4"/>
 
@@ -214,11 +198,13 @@ transition: fade-out
     - 投射与渲染：如前所述，将 3D 高斯投影为 2D 椭圆，并利用 Tile-based 光栅化渲染出当前视角下的图像 $I_{render}$。
     - 计算损失：对比渲染图与真实照片 $I_{gt}$，结合**像素级损失**和**结构级损失**
         $$
-        \mathcal{L} = (1-\lambda) \| I_{render} - I_{gt} \|^2 + \lambda SSIM(I_{render}, I_{gt})
+        \mathcal{L} = (1-\lambda) \cdot \| I_{render} - I_{gt} \|^2 + \lambda \cdot (1.0 - \text{SSIM}(I_{render}, I_{gt}))
         $$
     - 反向传播：计算损失函数对每个高斯属性（位置、缩放、旋转、透明度、SH）的梯度。
     - 参数更新：使用优化器更新高斯属性。
 
+---
+transition: slide-up
 ---
 
 # 总流程（Pipeline）
@@ -263,6 +249,105 @@ transition: fade-out
 </div>
 
 </div>
+---
+layout: two-cols
+transition: fade-out
+---
+
+# 场景风格化（Stylization）
+
+目标效果
+
+<v-clicks>
+
+1. **几何不变**：场景形状/结构保持
+2. **风格迁移**：颜色、纹理、笔触更像目标风格图
+3. **多视角一致**：不同视角渲染不闪烁、不漂色
+
+</v-clicks>
+
+::right::
+
+<div class="mt-6">
+  <div class="text-sm opacity-70 mb-2">展示位：风格目标 + 多视角结果</div>
+  <div class="grid grid-cols-2 gap-3">
+    <div class="h-40 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+      [Style Image]
+    </div>
+    <div class="h-40 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+      [Stylized Render]
+    </div>
+  </div>
+  <div class="mt-3 h-28 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+    [Multi-view consistency: v1 / v2 / v3 / v4]
+  </div>
+</div>
+
+---
+transition: slide-up
+---
+
+# 场景风格化（Stylization）
+
+原理：冻结几何参数，只优化颜色参数
+
+```mermaid
+flowchart LR
+  A["多视角照片"] --> B["预训练 3DGS 模型"]
+
+  S["风格图"] --> V["VGG-19 特征"]
+  B --> V2["VGG-19 特征"]
+
+  V --> Gs["Gram 矩阵: G_s"]
+  V2 --> Gr["Gram 矩阵: G_r"]
+
+  B --> Lgs["几何损失: 1.0-SSIM"]
+  Gr --> Lst["风格损失: MSE(Gr, Gs)"]
+  Gs --> Lst
+
+  Lgs --> L["总损失：L"]
+  Lst --> L
+  L --> U["反向传播（只更新 SH）"]
+  U --> B
+```
+
+<div class="grid grid-cols-2 gap-6 mt-6">
+  <div class="border rounded p-5">
+    <div class="font-bold mb-1">VGG 特征是什么？</div>
+    <div class="opacity-80 text-sm" v-markdown>
+
+VGG 特征指的是使用 VGG 神经网络提取的中间层激活值 $F\in\mathbb{R}^{C\times H\times W}$。这些特征表示图像在不同抽象层次的内容信息。
+
+  </div>
+  </div>
+  <div class="border rounded p-5">
+    <div class="font-bold mb-1">Gram 矩阵为什么代表风格？</div>
+    <div class="opacity-80 text-sm" v-markdown>
+
+将 $F$ 展平为 $\tilde{F}\in\mathbb{R}^{C\times HW}$，Gram 矩阵为 $G=\tilde{F}\tilde{F}^T\in\mathbb{R}^{C\times C}$。
+它忽略位置，只统计通道相关性，捕获颜色/纹理/笔触“统计特性”。
+
+  </div>
+  </div>
+</div>
+
+---
+transition: fade-out
+---
+
+# 场景编辑（Editing）
+
+目标效果
+
+用户通过自然语言描述物体，系统自动定位对应的高斯点，并支持**删除、改色、平移**等编辑操作。
+
+---
+
+# 场景编辑（Editing）
+
+原理：基于文本的高斯点筛选与编辑
+
+
 
 ---
 layout: section
@@ -324,14 +409,13 @@ layout: section
 
 # 关键代码展示
 
----
-layout: section
----
-
-# Demo
 
 ---
 layout: section
 ---
 
-# 总结和展望
+# 总结
+
+---
+
+# 展示 Demo 视频或现场演示效果
