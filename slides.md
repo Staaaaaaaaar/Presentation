@@ -198,7 +198,7 @@ transition: fade-out
     - 投射与渲染：如前所述，将 3D 高斯投影为 2D 椭圆，并利用 Tile-based 光栅化渲染出当前视角下的图像 $I_{render}$。
     - 计算损失：对比渲染图与真实照片 $I_{gt}$，结合**像素级损失**和**结构级损失**
         $$
-        \mathcal{L} = (1-\lambda) \cdot L_1 + \lambda \cdot (1.0 - \text{SSIM}(I_{render}, I_{gt}))
+        \mathcal{L} = (1-\lambda) \cdot L_1 + \lambda \cdot \text{DSSIM}
         $$
     - 反向传播：计算损失函数对每个高斯属性（位置、缩放、旋转、透明度、SH）的梯度。
     - 参数更新：使用优化器更新高斯属性。
