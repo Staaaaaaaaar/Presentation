@@ -2,7 +2,7 @@
 # 主题配置
 theme: seriph
 # 背景图片
-background: ./img/3DGS_2.png
+background: /3DGS_2.png
 # 语法高亮主题
 highlighter: shiki
 # 是否显示行号
@@ -73,7 +73,7 @@ $$
 
 </div>
 <div class="mt-2">
-    <img src="./img/3DGS_1.png" alt="Gaussian Ellipsoid" class="max-w-100 h-auto"/>
+    <img src="/3DGS_1.png" alt="Gaussian Ellipsoid" class="max-w-100 h-auto"/>
     <a href="https://www.bilibili.com/video/BV1k85NzMEv4/?spm_id_from=333.1387.search.video_card.click&vd_source=697eed77df6bbff463902caad2d804d9" target="_blank" class="text-sm text-blue-500 hover:underline">
       图源：影视飓风 - 把影视飓风变成模型，会怎样？
     </a>
@@ -100,7 +100,7 @@ $$
 给定一个观察方向 $\bold{v}$，我们可以计算出该方向对应的球面坐标 $(\theta, \phi)$，然后把该方向对应的所有基函数的值与存储的系数做加权求和，就合成出了这个方向应该看到的颜色。
 </div>
 <div class="mt-6" >
-    <img src="./img/spherical_harmonics.png" alt="Spherical Harmonics" class="max-w-full h-auto"/>
+    <img src="/spherical_harmonics.png" alt="Spherical Harmonics" class="max-w-full h-auto"/>
 </div>
 </div>
 
@@ -122,7 +122,7 @@ $$
 其中 $R$ 是旋转矩阵，$J$ 是射影变换的仿射近似的雅可比矩阵。
 
 <div class="">
-    <img src="./img/splatting.png" alt="Splatting" class="ma mt-10 max-w-120 h-auto"/>
+    <img src="/splatting.png" alt="Splatting" class="ma mt-10 max-w-120 h-auto"/>
 </div>
 
 ---
@@ -173,7 +173,7 @@ transition: fade-out
 # 总流程（Pipeline）
 
 <div class="ma w-150 flex justify-center mb-4">
-  <img src="./img/pipeline.png" alt="Pipeline Diagram" class="max-w-full h-auto"/>
+  <img src="/pipeline.png" alt="Pipeline Diagram" class="max-w-full h-auto"/>
 </div>
 
 <div class="grid grid-cols-2 gap-8">
@@ -185,7 +185,7 @@ transition: fade-out
         - 协方差：使用旋转 $q$ 和缩放 $s$ 表示
             $$ \Sigma = R S S^T R^T $$
 
-<img src="./img/SFM.png" alt="SFM" class="max-w-full h-auto mt-4"/>
+<img src="/SFM.png" alt="SFM" class="max-w-full h-auto mt-4"/>
 
 </div>
 
@@ -196,7 +196,7 @@ transition: fade-out
 # 总流程（Pipeline）
 
 <div class="ma w-150 flex justify-center mb-4">
-  <img src="./img/pipeline.png" alt="Pipeline Diagram" class="max-w-full h-auto"/>
+  <img src="/pipeline.png" alt="Pipeline Diagram" class="max-w-full h-auto"/>
 </div>
 
 2.  **训练循环：**
@@ -220,7 +220,7 @@ transition: slide-up
 
 3.  **密度自适应控制：** 3DGS 能够精细刻画细节的核心。
 
-<img src="./img/ADC.png" alt="Density Control" class="max-w-full h-auto mt-4"/>
+<img src="/ADC.png" alt="Density Control" class="max-w-full h-auto mt-4"/>
 
 </div>
 
@@ -267,14 +267,14 @@ transition: fade-out
 1. **几何不变**：场景形状/结构保持
 2. **风格迁移**：颜色、纹理、笔触更像目标风格图
 
-<img src="./img/style_img.jpg" alt="Content Image" class="ma mt-15 max-w-80 h-auto"/>
+<img src="/style_img.jpg" alt="Content Image" class="ma mt-15 max-w-80 h-auto"/>
 
 
 ::right::
 
 <div class="mt-4">
-  <img src="./img/style_img.jpg" alt="Content Image" class="ma max-w-70 h-auto"/>
-  <img src="./img/style_scene.png" alt="Style Image" class="ma mt-6 max-w-100 h-auto"/>
+  <img src="/style_img.jpg" alt="Content Image" class="ma max-w-70 h-auto"/>
+  <img src="/style_scene.png" alt="Style Image" class="ma mt-6 max-w-100 h-auto"/>
 </div>
 
 ---
@@ -456,6 +456,45 @@ layout: section
 
 # 代码展示
 
+---
+
+# 自适应密度控制
+
+<div class="w-full max-h-100 overflow-auto">
+```python
+class GaussianModel:
+    def densify_and_prune(self, 
+                          max_grad,     #最大梯度阈值
+                          min_opacity,  #最小不透明度阈值
+                          extent,       #场景范围
+                          max_screen_size,  #最大屏幕半径
+                          radii         #所有高斯球的2D投影半径
+                          ):
+        '''密化和剪枝'''
+        grads = self.xyz_gradient_accum / self.denom    #平均梯度
+        grads[grads.isnan()] = 0.0      #未被渲染的球
+
+        self.tmp_radii = radii      #临时存储
+        self.densify_and_clone(grads, max_grad, extent)     #复制
+        self.densify_and_split(grads, max_grad, extent)     #分裂
+
+        #不透明度剪枝
+        prune_mask = (self.opacity_activation(self.opacity) < min_opacity).squeeze()
+        
+        if max_screen_size:
+            big_points_vs = self.max_radii2D > max_screen_size      #屏幕空间尺寸剪枝
+            big_points_ws = self.scaling_activation(self.scaling).max(dim=1).values > 0.1 * extent       #世界空间尺寸剪枝
+            prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)   #剪枝条件合并
+        self.prune_points(prune_mask)
+
+        #清理内存
+        tmp_radii = self.tmp_radii
+        self.tmp_radii = None
+
+        torch.cuda.empty_cache()
+```
+</div>
+
 
 ---
 layout: section
@@ -466,7 +505,50 @@ layout: section
 ---
 
 # Demo
+3DGS 的 OpenGL 实现
 
+
+---
+layout: default
+class: 'text-left'
 ---
 
 # 展望
+
+<div class="text-sm grid grid-cols-2 gap-8 mt-4">
+<div>
+
+#### 不足与挑战
+
+<div class="mt-4">
+
+* **存储压力与显存限制**：原始 3DGS 包含数百万个高斯基元，动辄数百 MB 的体积给**移动端部署**和网络传输带来极大挑战。
+* **物理仿真**：缺乏显式网格结构，导致**碰撞检测、布料模拟**等物理交互难以直接进行。
+* **重光照困难**：颜色信息耦合在球谐函数中，难以像传统渲染那样分离出材质、法线与环境光。
+* **动态一致性**：场景建模在处理剧烈运动或大幅拓扑变化时，仍存在计算效率低和重影问题。
+* ……
+
+</div>
+</div>
+<div>
+
+#### 趋势与前沿
+
+<div class="mt-4">
+
+* **轻量化与压缩**：在保持“实时渲染”优势的前提下，将场景体积降低到可以在 5G 甚至 4G 网络下流畅加载的水平。
+* **显式表面重构**：将高斯球扁平化，转化为硬质的、带有拓扑结构的**三角网格**，提供可用于物理引擎的精确几何。
+* **语义与场景理解**：让每个高斯球具备**语义标签**，支持物体级编辑、删除与场景重组。
+* **生成式 AIGC**：结合扩散模型，通过文字或单张图片生成高质量的 3DGS 资产。
+* **4DGS 技术**：在一个“标准帧”上学习**变形场**，实现时间上的连续建模与渲染；在**四维空间**中定义高斯椭球，渲染时对 4D 椭球进行“时间切片”，得到的 3D 高斯投影，再进行常规渲染。
+* ……
+
+</div>
+</div>
+</div>
+
+---
+layout: end
+---
+
+# END
