@@ -267,14 +267,14 @@ transition: fade-out
 1. **几何不变**：场景形状/结构保持
 2. **风格迁移**：颜色、纹理、笔触更像目标风格图
 
-<img src="/style_img.jpg" alt="Content Image" class="ma mt-15 max-w-80 h-auto"/>
+<img src="/style_img.jpg" alt="Style Image" class="ma mt-15 max-w-80 h-auto"/>
 
 
 ::right::
 
-<div class="mt-4">
-  <img src="/style_img.jpg" alt="Content Image" class="ma max-w-70 h-auto"/>
-  <img src="/style_scene.png" alt="Style Image" class="ma mt-6 max-w-100 h-auto"/>
+<div class="">
+  <img src="/origin_scene.png" alt="Origin Scene" class="ma mt-4 max-w-100 h-auto"/>
+  <img src="/style_scene.png" alt="Style Scene" class="ma mt-4 max-w-100 h-auto"/>
 </div>
 
 ---
@@ -334,6 +334,11 @@ transition: fade-out
 目标效果
 
 用户通过自然语言描述物体，系统自动定位对应的高斯点，并支持**删除、改色、平移**等编辑操作。
+
+<img src="/edit_img.png" alt="Edit Image" class="ma mt-8 max-w-130 h-auto"/>
+<div class="text-center text-sm text-gray-500 mt-2">
+the train color 255,0,0
+</div>
 
 ---
 transition: fade-out
@@ -457,11 +462,13 @@ layout: section
 # 代码展示
 
 ---
+layout: default
+transition: slide-up
+---
 
 # 自适应密度控制
 
-<div class="w-full max-h-100 overflow-auto">
-```python
+```python{*|10|14|15|17-27}{maxHeight: '420px'}
 class GaussianModel:
     def densify_and_prune(self, 
                           max_grad,     #最大梯度阈值
@@ -482,9 +489,12 @@ class GaussianModel:
         prune_mask = (self.opacity_activation(self.opacity) < min_opacity).squeeze()
         
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size      #屏幕空间尺寸剪枝
-            big_points_ws = self.scaling_activation(self.scaling).max(dim=1).values > 0.1 * extent       #世界空间尺寸剪枝
-            prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)   #剪枝条件合并
+            #屏幕空间尺寸剪枝
+            big_points_vs = self.max_radii2D > max_screen_size
+            #世界空间尺寸剪枝
+            big_points_ws = self.scaling_activation(self.scaling).max(dim=1).values > 0.1 * extent
+            #剪枝条件合并
+            prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 
         #清理内存
@@ -493,7 +503,98 @@ class GaussianModel:
 
         torch.cuda.empty_cache()
 ```
-</div>
+
+---
+layout: default
+transition: slide-up
+---
+
+# VGG 特征提取
+
+```python{*|10-11|20-37|39-41}{maxHeight: '420px'}
+class VGGFeatureExtractor(nn.Module):
+    """VGG-19 特征提取器"""
+    
+    # 风格层
+    STYLE_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1'] 
+    
+    def __init__(self):
+        super(VGGFeatureExtractor, self).__init__()
+        
+        # 预训练的VGG19模型
+        vgg = vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
+        
+        self.model = nn.Sequential()
+        i = 1  # block 计数
+        j = 1  # layer 计数
+        
+        # 提取截止的层
+        MAX_LAYER = 'relu4_1' 
+        
+        for layer in vgg.children():
+            name = None
+            if isinstance(layer, nn.Conv2d):
+                name = f'conv{i}_{j}'
+            elif isinstance(layer, nn.ReLU):
+                name = f'relu{i}_{j}'
+                layer = nn.ReLU(inplace=False)
+                j += 1
+            elif isinstance(layer, nn.MaxPool2d):
+                name = f'pool{i}'
+                i += 1
+                j = 1  # 进入下一个 block，重置层计数
+            
+            if name:
+                self.model.add_module(name, layer)
+            
+            if name == MAX_LAYER:
+                break
+        
+        # 冻结参数
+        for param in self.parameters():
+            param.requires_grad = False
+        self.eval()
+
+```
+
+---
+layout: default
+transition: slide-up
+---
+
+# Autoencoder
+
+```python{*|10-20|22-29}{maxHeight: '420px'}
+class CLIPCompressor(nn.Module):
+    """CLIP 特征压缩器"""
+    def __init__(
+        self,
+        encoder_dims=(256, 128, 64, 32, 3), # 编码器层级维度
+        decoder_dims=(32, 64, 128, 256, 512), # 解码器层级维度
+    ):
+        super().__init__()
+
+        # 编码器
+        enc = []
+        in_dim = 512
+        for i, d in enumerate(encoder_dims):
+            enc.append(nn.Linear(in_dim, d))
+            # BatchNorm, ReLU 
+            if i < len(encoder_dims) - 1:
+                enc.append(nn.BatchNorm1d(d))
+                enc.append(nn.ReLU(inplace=True))
+            in_dim = d
+        self.encoder = nn.Sequential(*enc)
+
+        # 解码器
+        dec = []
+        for i, d in enumerate(decoder_dims):
+            dec.append(nn.Linear(in_dim, d))
+            if i < len(decoder_dims) - 1:
+                dec.append(nn.ReLU(inplace=True))
+            in_dim = d
+        self.decoder = nn.Sequential(*dec)
+```
 
 
 ---
@@ -503,14 +604,36 @@ layout: section
 # 总结
 
 ---
+transition: fade-out
+---
 
 # Demo
-3DGS 的 OpenGL 实现
+3DGS 实时渲染的 OpenGL 实现
 
+---
+transition: fade-out
+---
+
+# Demo
+三维场景重建
+
+---
+transition: fade-out
+---
+
+# Demo
+风格化三维场景重建
+
+---
+transition: slide-up
+---
+
+# Demo
+场景编辑
 
 ---
 layout: default
-class: 'text-left'
+class: "text-left"
 ---
 
 # 展望
