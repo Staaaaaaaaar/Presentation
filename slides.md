@@ -2,7 +2,7 @@
 # 主题配置
 theme: seriph
 # 背景图片
-background: https://source.unsplash.com/collection/94734566/1920x1080
+background: ./img/3DGS_2.png
 # 语法高亮主题
 highlighter: shiki
 # 是否显示行号
@@ -22,7 +22,21 @@ title: 基于 3DGS 的场景重建和编辑
 ---
 
 # 基于 3DGS 的场景重建和编辑
-## Scene Reconstruction and Editing based on Gaussian Splatting
+## Scene Reconstruction and Editing based on 3DGS
+
+<div class="pt-12">
+  <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer hover:bg-white hover:bg-opacity-10">
+    按空格键开始 <carbon:arrow-right class="inline"/>
+  </span>
+</div>
+
+<div class="abs-br m-6 flex gap-2">
+  <a href="https://github.com/Staaaaaaaaar/PKU-CG-2025Fall-Project" target="_blank" alt="GitHub"
+    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
+    <carbon-logo-github />
+  </a>
+</div>
+
 
 ---
 layout: section
@@ -46,7 +60,7 @@ $$
 </div>
 
 <div class="grid grid-cols-2 gap-8 mt-4">
-<div>
+<div class="mt-6">
 每个高斯椭球包含以下可学习参数：
 
 * **中心位置：** $\mu \in \mathbb{R}^3$
@@ -58,13 +72,11 @@ $$
 * **不透明度：** $\alpha \in [0, 1]$
 
 </div>
-<div class="mt-4">
-    <div class="flex items-center justify-center h-48 bg-gray-200 rounded text-gray-500">
-        [示意图：由无数小椭球组成的3D物体]
-    </div>
-    <div class="mt-2 text-sm text-gray-500 text-center">
-        图示：显式高斯球表示 vs 隐式神经网络
-    </div>
+<div class="mt-2">
+    <img src="./img/3DGS_1.png" alt="Gaussian Ellipsoid" class="max-w-100 h-auto"/>
+    <a href="https://www.bilibili.com/video/BV1k85NzMEv4/?spm_id_from=333.1387.search.video_card.click&vd_source=697eed77df6bbff463902caad2d804d9" target="_blank" class="text-sm text-blue-500 hover:underline">
+      图源：影视飓风 - 把影视飓风变成模型，会怎样？
+    </a>
 </div>
 </div>
 
@@ -88,12 +100,7 @@ $$
 给定一个观察方向 $\bold{v}$，我们可以计算出该方向对应的球面坐标 $(\theta, \phi)$，然后把该方向对应的所有基函数的值与存储的系数做加权求和，就合成出了这个方向应该看到的颜色。
 </div>
 <div class="mt-6" >
-    <div class="flex items-center justify-center h-48 bg-gray-200 rounded text-gray-500">
-        [示意图：球谐函数的可视化]
-    </div>
-    <div class="mt-2 text-sm text-gray-500 text-center">
-        图示：不同阶数的球谐函数
-    </div>
+    <img src="./img/spherical_harmonics.png" alt="Spherical Harmonics" class="max-w-full h-auto"/>
 </div>
 </div>
 
@@ -115,9 +122,7 @@ $$
 其中 $R$ 是旋转矩阵，$J$ 是射影变换的仿射近似的雅可比矩阵。
 
 <div class="">
-    <div class="flex items-center justify-center ma w-100 h-50 bg-gray-100 rounded text-gray-400 border-2 border-dashed">
-        [示意图：高斯泼溅]
-    </div>
+    <img src="./img/splatting.png" alt="Splatting" class="ma mt-10 max-w-120 h-auto"/>
 </div>
 
 ---
@@ -258,29 +263,18 @@ transition: fade-out
 
 目标效果
 
-<v-clicks>
 
 1. **几何不变**：场景形状/结构保持
 2. **风格迁移**：颜色、纹理、笔触更像目标风格图
-3. **多视角一致**：不同视角渲染不闪烁、不漂色
 
-</v-clicks>
+<img src="./img/style_img.jpg" alt="Content Image" class="ma mt-15 max-w-80 h-auto"/>
+
 
 ::right::
 
-<div class="mt-6">
-  <div class="text-sm opacity-70 mb-2">展示位：风格目标 + 多视角结果</div>
-  <div class="grid grid-cols-2 gap-3">
-    <div class="h-40 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-      [Style Image]
-    </div>
-    <div class="h-40 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-      [Stylized Render]
-    </div>
-  </div>
-  <div class="mt-3 h-28 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-    [Multi-view consistency: v1 / v2 / v3 / v4]
-  </div>
+<div class="mt-4">
+  <img src="./img/style_img.jpg" alt="Content Image" class="ma max-w-70 h-auto"/>
+  <img src="./img/style_scene.png" alt="Style Image" class="ma mt-6 max-w-100 h-auto"/>
 </div>
 
 ---
@@ -424,58 +418,43 @@ layout: section
 # 项目框架
 
 ---
-layout: two-cols
----
 
 # 代码目录结构
 
 ```bash
-MyProject/
-├── assets/          # 原始图像数据
-├── output/          # 模型输出与日志
-├── scene/           # 场景管理模块
-│   ├── dataset.py   # 读取 Colmap 数据
-│   └── gaussian.py  # 高斯模型类(核心)
-├── gaussian_renderer/ 
-│   └── __init__.py  # 渲染器入口
-├── train.py         # 训练主脚本
-└── utils/           # 通用工具
+.
+├── data/               # 存放训练数据，包括图像和相机参数
+├── docs/               # 文档说明
+├── output/             # 保存训练好的 3D 高斯点云模型和渲染结果
+├── scripts/            # 数据预处理、训练和渲染脚本
+├── src/                # 项目核心源代码
+│   ├── core/           # 3D 高斯点云的核心数据结构和数学运算
+│   ├── rendering/      # 基于 OpenGL 的渲染管线，提供训练可视化 API
+│   ├── training/       # 模型训练
+│   │   ├──arguments/   # 参数封装、控制
+│   │   ├──edit/        # 场景编辑
+│   │   ├──gaussian_renderer/   # 可微渲染器
+│   │   ├──scene/       # 高斯场景封装、数据读取
+│   │   ├──style/       # 场景风格化
+│   │   ├──submodules/  # 子模块
+│   │   └──utils/       # 相机、图像、损失等辅助函数
+│   │
+│   └── utils/          # 文件 I/O、日志记录等实用功能
+└── third_party/        # 第三方库（如 PyTorch、OpenGL 包装器）
 ```
 
-::right::
-
-<div class="mt-14 ml-8">
-
-模块功能解析
-
-<v-clicks>
-
-- Dataset Loader:
-
-解析 cameras.txt, images.txt, points3D.txt。
-
-将相机外参转换为世界坐标系矩阵。
-
-Gaussian Model (gaussian.py):
-
-维护所有可学习参数 (_xyz, _features_dc, _opacity, _scaling, _rotation)。
-
-封装了 densify_and_prune (密度控制) 逻辑。
-
-Renderer:
-
-调用 diff-gaussian-rasterization (C++/CUDA)。
-
-实现可微光栅化，支持反向传播。
-
-</v-clicks>
+<div class="abs-br m-6 flex gap-2">
+  <a href="https://github.com/Staaaaaaaaar/PKU-CG-2025Fall-Project" target="_blank" alt="GitHub"
+    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
+    <carbon-logo-github />
+  </a>
 </div>
 
 ---
 layout: section
 ---
 
-# 关键代码展示
+# 代码展示
 
 
 ---
@@ -486,4 +465,8 @@ layout: section
 
 ---
 
-# 展示 Demo 视频或现场演示效果
+# Demo
+
+---
+
+# 展望
