@@ -164,7 +164,7 @@ transition: fade-out
 layout: section
 ---
 
-# 三维场景重建
+# 三维场景重建和编辑
 
 ---
 transition: fade-out
@@ -709,29 +709,43 @@ layout: section
 transition: fade-out
 ---
 
-# Demo
+# DEMO
 3DGS 实时渲染的 OpenGL 实现
 
 ---
 transition: fade-out
 ---
 
-# Demo
+# DEMO
 三维场景重建
 
 ---
 transition: fade-out
 ---
 
-# Demo
+# DEMO
 风格化三维场景重建
 
 ---
 transition: slide-up
 ---
 
-# Demo
+# DEMO
 场景编辑
+
+---
+transition: slide-up
+---
+
+# MEMO
+
+- 使用 pycolmap 代替 colmap 程序进行 SfM？
+- 为什么不先把 2D 图像风格化，再使用风格化图像重建？
+- 风格化重建训练中，风格损失的权重的选择。
+- 风格化重建训练中，只优化 sh 系数的缺陷。
+- 场景编辑中，为什么最开始不能不经 SAM 分割直接生成语义特征？
+- ……
+
 
 ---
 layout: default
