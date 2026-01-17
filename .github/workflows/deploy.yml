@@ -3,7 +3,7 @@ name: Deploy pages
 on:
   workflow_dispatch:
   push:
-    branches: [CG-pre]
+    branches: [cg/project]
 
 permissions:
   contents: read
