@@ -337,7 +337,7 @@ transition: fade-out
 
 <img src="/edit_img.png" alt="Edit Image" class="ma mt-8 max-w-130 h-auto"/>
 <div class="text-center text-sm text-gray-500 mt-2">
-the train color 255,0,0
+query: the train; action: color; value: 255,0,0
 </div>
 
 ---
@@ -426,27 +426,60 @@ layout: section
 
 # 代码目录结构
 
+````md magic-move
 ```bash
 .
-├── data/               # 存放训练数据，包括图像和相机参数
-├── docs/               # 文档说明
-├── output/             # 保存训练好的 3D 高斯点云模型和渲染结果
-├── scripts/            # 数据预处理、训练和渲染脚本
-├── src/                # 项目核心源代码
-│   ├── core/           # 3D 高斯点云的核心数据结构和数学运算
-│   ├── rendering/      # 基于 OpenGL 的渲染管线，提供训练可视化 API
-│   ├── training/       # 模型训练
-│   │   ├──arguments/   # 参数封装、控制
-│   │   ├──edit/        # 场景编辑
-│   │   ├──gaussian_renderer/   # 可微渲染器
-│   │   ├──scene/       # 高斯场景封装、数据读取
-│   │   ├──style/       # 场景风格化
-│   │   ├──submodules/  # 子模块
-│   │   └──utils/       # 相机、图像、损失等辅助函数
-│   │
-│   └── utils/          # 文件 I/O、日志记录等实用功能
-└── third_party/        # 第三方库（如 PyTorch、OpenGL 包装器）
+├── data/                                       # 存放训练数据，包括图像和相机参数
+├── docs/                                       # 文档说明
+├── output/                                     # 保存训练好的 3D 高斯点云模型和渲染结果
+├── scripts/                                    # 数据预处理、训练和渲染脚本
+├── src/                                        # 项目核心源代码
+│   ├── rendering/                              # 基于 OpenGL 的实时渲染模块
+│   └── training/                               # 场景重建和编辑模块
+└── third_party/                                # 第三方库
 ```
+```bash
+.
+├── data/                                     # 存放训练数据，包括图像和相机参数
+├── docs/                                     # 文档说明
+├── output/                                   # 保存训练好的 3D 高斯点云模型和渲染结果
+├── scripts/                                  # 数据预处理、训练和渲染脚本
+├── src/                                      # 项目核心源代码
+│   ├── rendering/                            # 基于 OpenGL 的实时渲染模块
+│   │  ├─ Camera.h                            # 相机参数与控制接口
+│   │  ├─ Camera.cpp                          # 相机矩阵与交互实现
+│   │  ├─ GaussianPointCloud.h                # 点云数据结构与接口
+│   │  ├─ GaussianPointCloud.cpp              # PLY 解析、上传 GPU
+│   │  ├─ Renderer.h                          # 渲染主流程接口
+│   │  ├─ Renderer.cpp                        # 排序、绘制与状态管理
+│   │  ├─ Shader.h                            # Shader 封装接口
+│   │  ├─ Shader.cpp                          # Shader 编译/链接/Uniform
+│   │  ├─ main.cpp                            # 程序入口与渲染循环
+│   │  ├─ CMakeLists.txt                      # 渲染模块构建配置
+│   │  ├─ utils/                              # 工具函数
+│   │  └─ shaders/                            # 着色器代码
+│   └── training/                             # 场景重建和编辑模块
+└─ third_party/                               # 第三方库
+```
+```bash
+.
+├── data/                                     # 存放训练数据，包括图像和相机参数
+├── docs/                                     # 文档说明
+├── output/                                   # 保存训练好的 3D 高斯点云模型和渲染结果
+├── scripts/                                  # 数据预处理、训练和渲染脚本
+├── src/                                      # 项目核心源代码
+│   ├── rendering/                            # 基于 OpenGL 的实时渲染模块
+│   └── training/                             # 场景重建和编辑模块
+│       ├──arguments/                         # 参数封装、控制
+│       ├──edit/                              # 场景编辑
+│       ├──gaussian_renderer/                 # 可微渲染器
+│       ├──scene/                             # 高斯场景封装、数据读取
+│       ├──style/                             # 场景风格化
+│       ├──submodules/                        # 子模块
+│       └──utils/                             # 相机、图像、损失等辅助函数
+└── third_party/                              # 第三方库
+```
+````
 
 <div class="abs-br m-6 flex gap-2">
   <a href="https://github.com/Staaaaaaaaar/PKU-CG-2025Fall-Project" target="_blank" alt="GitHub"
@@ -460,6 +493,75 @@ layout: section
 ---
 
 # 代码展示
+
+---
+transition: slide-up
+---
+
+# 高斯泼溅
+
+````md magic-move
+```glsl
+// src/rendering/shaders/splat.vert
+
+// 由四元数构造旋转矩阵列向量
+vec3 col0 = vec3(1.0 - 2.0 * (yy + zz), 2.0 * (xy + wz), 2.0 * (xz - wy));
+vec3 col1 = vec3(2.0 * (xy - wz), 1.0 - 2.0 * (xx + zz), 2.0 * (yz + wx));
+vec3 col2 = vec3(2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (xx + yy));
+
+// 计算 3D 协方差
+vec3 axis0 = col0 * aScale.x;
+vec3 axis1 = col1 * aScale.y;
+vec3 axis2 = col2 * aScale.z;
+
+mat3 A = mat3(axis0, axis1, axis2);
+mat3 cov3 = A * transpose(A);
+```
+```glsl
+// src/rendering/shaders/splat.vert
+
+// 计算雅可比矩阵
+float jsx = (SX * WIDTH) / (2.0 * tz);
+float jsy = (SY * HEIGHT) / (2.0 * tz);
+float jtx = (SX * t.x * WIDTH) / (2.0 * tz2);
+float jty = (SY * t.y * HEIGHT) / (2.0 * tz2);
+float jtz = ((zFar - zNear) * WZ) / (2.0 * tz2);
+
+mat3 J = mat3(
+    jsx, 0.0, 0.0,
+    0.0, jsy, 0.0,
+    jtx, jty, jtz
+);
+
+// 计算 2D 协方差
+mat3 W = mat3(view);
+mat3 JW = J * W;
+mat3 V_prime = (JW * cov3) * transpose(JW);
+
+float cov00 = V_prime[0][0];
+float cov01 = V_prime[0][1];
+float cov11 = V_prime[1][1];
+```
+```glsl
+// src/rendering/shaders/splat.vert
+
+// SH 颜色（3x16）
+float Y[16];
+EvalSH16(worldDir, Y);
+int base = int(gl_VertexID) * 48;
+vec3 col = vec3(0.0);
+for (int c = 0; c < 3; ++c)
+{
+    float sum = 0.0;
+    int offset = base + c * 16;
+    for (int k = 0; k < 16; ++k)
+        sum += texelFetch(shCoeffsTex, offset + k).r * Y[k];
+    col[c] = sum;
+}
+col = vec3(0.5) + col;
+```
+````
+
 
 ---
 layout: default
@@ -559,7 +661,7 @@ class VGGFeatureExtractor(nn.Module):
 
 ---
 layout: default
-transition: slide-up
+transition: slide-left
 ---
 
 # Autoencoder
