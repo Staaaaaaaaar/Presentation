@@ -710,14 +710,12 @@ transition: fade-out
 ---
 
 # DEMO
-3DGS 实时渲染的 OpenGL 实现
+三维场景重建 + 3DGS 实时渲染的 OpenGL 实现
 
----
-transition: fade-out
----
-
-# DEMO
-三维场景重建
+<div class="grid grid-cols-2 gap-8 mt-10">
+  <img src="/table.gif" alt="OpenGL Demo" class="max-w-full h-auto"/>
+  <img src="/train.gif" alt="OpenGL Demo" class="max-w-full h-auto"/>
+</div>
 
 ---
 transition: fade-out
@@ -732,20 +730,12 @@ transition: slide-up
 
 # DEMO
 场景编辑
-
----
-transition: slide-up
----
-
-# MEMO
-
-- 使用 pycolmap 代替 colmap 程序进行 SfM？
-- 为什么不先把 2D 图像风格化，再使用风格化图像重建？
-- 风格化重建训练中，风格损失的权重的选择。
-- 风格化重建训练中，只优化 sh 系数的缺陷。
-- 场景编辑中，为什么最开始不能不经 SAM 分割直接生成语义特征？
-- ……
-
+<div class="text-center">
+query: "the train", action: "color", value: "[255, 0, 0]"
+</div>
+<div class="mt-6">
+  <img src="/red_train.gif" alt="OpenGL Demo" class="ma max-w-100 h-auto"/>
+</div>
 
 ---
 layout: default
