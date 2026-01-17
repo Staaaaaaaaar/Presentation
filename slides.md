@@ -712,9 +712,11 @@ transition: fade-out
 # DEMO
 三维场景重建 + 3DGS 实时渲染的 OpenGL 实现
 
-<div class="grid grid-cols-2 gap-8 mt-10">
-  <img src="/table.gif" alt="OpenGL Demo" class="max-w-full h-auto"/>
-  <img src="/train.gif" alt="OpenGL Demo" class="max-w-full h-auto"/>
+<div class="ma grid grid-cols-2 gap-2">
+  <img src="/table.gif" alt="OpenGL Demo" class="ml-a max-w-full h-50"/>
+  <img src="/train.gif" alt="OpenGL Demo" class=" max-w-full h-50"/>
+  <img src="/flower.gif" alt="OpenGL Demo" class="ml-a max-w-full h-50"/>
+  <img src="/toy_house.gif" alt="OpenGL Demo" class="max-w-full h-50"/>
 </div>
 
 ---
@@ -723,6 +725,11 @@ transition: fade-out
 
 # DEMO
 风格化三维场景重建
+
+<div class="grid grid-cols-2 gap-8 mt-10">
+  <img src="/style_img.jpg" alt="Style Image" class="w-auto h-80"/>
+  <img src="/style_train.gif" alt="OpenGL Demo" class="w-auto h-80"/>
+</div>
 
 ---
 transition: slide-up
@@ -734,7 +741,7 @@ transition: slide-up
 query: "the train", action: "color", value: "[255, 0, 0]"
 </div>
 <div class="mt-6">
-  <img src="/red_train.gif" alt="OpenGL Demo" class="ma max-w-100 h-auto"/>
+  <img src="/red_train.gif" alt="OpenGL Demo" class="ma max-w-110 h-auto"/>
 </div>
 
 ---
