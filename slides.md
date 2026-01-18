@@ -337,7 +337,7 @@ transition: fade-out
 
 <img src="/edit_img.png" alt="Edit Image" class="ma mt-8 max-w-130 h-auto"/>
 <div class="text-center text-sm text-gray-500 mt-2">
-query: the train; action: color; value: 255,0,0
+query: the train; action: color; value: [255,0,0]
 </div>
 
 ---
@@ -737,11 +737,31 @@ transition: slide-up
 
 # DEMO
 场景编辑
-<div class="text-center">
-query: "the train", action: "color", value: "[255, 0, 0]"
+<div class="grid grid-cols-2 gap-2">
+<div> 
+  <img src="/box.gif" alt="OpenGL Demo" class="ma max-w-60 h-auto"/>
+  <div class="text-center text-sm text-gray-500">
+    original scene
+  </div>
 </div>
-<div class="mt-6">
-  <img src="/red_train.gif" alt="OpenGL Demo" class="ma max-w-110 h-auto"/>
+<div>
+  <img src="/delete_ground.gif" alt="OpenGL Demo" class="ma max-w-60 h-auto"/>
+    <div class="text-center text-sm text-gray-500">
+    query: the ground; action: delete
+  </div>
+</div>
+<div>
+  <img src="/move_box.gif" alt="OpenGL Demo" class="ma max-w-60 h-auto"/>
+    <div class="text-center text-sm text-gray-500">
+    query: the box; action: move; value: [10,10,10]
+  </div>
+</div>
+<div>
+  <img src="/blue_ground.gif" alt="OpenGL Demo" class="ma max-w-60 h-auto"/>
+    <div class="text-center text-sm text-gray-500">
+    query: the ground; action: color; value: [0,0,255]
+  </div>
+</div>
 </div>
 
 ---
