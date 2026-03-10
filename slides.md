@@ -1,6 +1,6 @@
 ---
 theme: seriph
-background: /imgs/pexels-eclipse-chasers-716719984-20636058.jpg
+background: /pexels-eclipse-chasers-716719984-20636058.jpg
 class: text-center
 highlighter: shiki
 lineNumbers: true
@@ -37,7 +37,7 @@ What is an impact crater?
 ::right::
 
 <div class="ml-6 mt-14 space-y-3">
-  <img src="/imgs/yunshikeng.jpg" class="rounded-lg shadow-xl w-full max-h-72 object-cover" />
+  <img src="/yunshikeng.jpg" class="rounded-lg shadow-xl w-full max-h-72 object-cover" />
   <p class="text-xs text-center text-gray-400">月球表面遍布的陨石坑记录了太阳系约45亿年的撞击历史</p>
 
 - 揭示太阳系早期撞击历史
@@ -65,7 +65,7 @@ The impact process
 ::right::
 
 <div class="ml-6 mt-30 space-y-3">
-  <img src="/imgs/Impactcraterformation_lmb.png" class="rounded-lg shadow-xl w-full max-h-72 object-cover" />
+  <img src="/Impactcraterformation_lmb.png" class="rounded-lg shadow-xl w-full max-h-72 object-cover" />
 </div>
 
 ---
@@ -100,19 +100,19 @@ Types of impact craters
 
 <div class="grid grid-cols-4 gap-4">
 <div>
-<img src="/imgs/Plato_(LRO).png" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
+<img src="/Plato_(LRO).png" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
 <p class="text-xs text-center text-gray-400">平底坑：月球上的柏拉图坑</p>
 </div>
 <div>
-<img src="/imgs/LRO_WAC_Tycho_crater_mosaic.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
+<img src="/LRO_WAC_Tycho_crater_mosaic.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
 <p class="text-xs text-center text-gray-400">中央峰撞击坑：月球上的第谷坑</p>
 </div>
 <div>
-<img src="/imgs/Barton_crater.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
+<img src="/Barton_crater.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
 <p class="text-xs text-center text-gray-400">中央环撞击坑：金星上的巴顿撞击坑</p>
 </div>
 <div>
-<img src="/imgs/AS15-M-1147.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
+<img src="/AS15-M-1147.jpg" class="rounded-lg shadow-xl max-h-45 object-cover ma" />
 <p class="text-xs text-center text-gray-400">中央坑撞击坑：月球上的梯摩恰里斯陨石坑</p>
 </div>
 </div>
