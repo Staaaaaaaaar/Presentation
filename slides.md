@@ -64,8 +64,8 @@ The impact process
 
 ::right::
 
-<div class="ml-6 mt-30 space-y-3">
-  <img src="/Impactcraterformation_lmb.png" class="rounded-lg shadow-xl w-full max-h-72 object-cover" />
+<div class="ml-6 mt-22 space-y-3">
+  <img src="/Impactcraterformation_lmb.png" class="rounded-lg shadow-xl w-full object-cover" />
 </div>
 
 ---
