@@ -1,6 +1,6 @@
 ---
 theme: seriph
-background: ./imgs/pexels-eclipse-chasers-716719984-20636058.jpg
+background: /imgs/pexels-eclipse-chasers-716719984-20636058.jpg
 class: text-center
 highlighter: shiki
 lineNumbers: true
